@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo</title>
+    <style>
+        @font-face {
+            font-family: 'MiFuente';
+            src: url('SantanderHeadline-Regular.otf') format('opentype'); /* Asegúrate de que el archivo .otf esté en la misma carpeta */
+        }
+
+        body {
+            font-family: 'MiFuente', Arial, sans-serif; /* Aplicamos la fuente personalizada */
+            margin: 0;
+            padding: 0;
+            background: url('Fondo 1.png') no-repeat center center fixed; /* Imagen de fondo */
+            background-size: cover; /* Escalar la imagen para cubrir todo el fondo */
+        }    
+        .encabezado {
+            background-color: rgba(226, 0, 26, 0.9); /* Fondo semi-transparente */
+            color: #FFFFFF;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .encabezado img {
+            position: absolute;
+            left: 20px;
+            max-height: 100px;
+        }
+
+        .contenedor-principal {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            position: relative;
+            top: 20px; /* Ajuste para que esté debajo del encabezado */
+            right: 150px;
+            padding-bottom: 50px; /* Espacio para el bloque de ganadores */
+        }
+
+        .contenedor {
+            width: 600px;
+            padding: 20px;
+            margin-bottom: 10px;
+            border: 2px solid #E2001A;
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco semitransparente */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px; /* Bordes redondeados */
+        }
+
+        .contenedorTitulo {
+            width: 600px;
+            text-align: center; /* Centra el texto dentro del contenedor */
+        }
+
+        .contenedorTitulo h1 {
+            font-size: 70px; /* Tamaño del texto */
+            margin: 0; /* Elimina márgenes por defecto */
+            color: #FFFFFF;
+        }
+
+        h2 {
+            margin: 0 0 10px 0;
+        }
+
+        button {
+            background-color: #E2001A;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #C90017;
+        }
+
+        .ganadores {
+            width: 600px;
+            padding: 20px;
+            margin-bottom: 10px;
+            border: 2px solid #E2001A;
+            background-color: #E2001A; /* Fondo rojo */
+            color: #FFFFFF;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .ganadores ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .ganadores li {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Encabezado -->
+    <div class="encabezado">
+        <img src="SantanderSeguros_Blanco.png" alt="Logo del Sorteo">
+    </div>
+
+
+    <!-- Contenedor Principal -->
+    <div class="contenedor-principal">
+        <div class="contenedorTitulo">
+            <h1>Sorteo</h1>
+        </div>
+        <!-- Sección de Extracción -->
+        <div class="contenedor">
+            <h2>Extracción de participantes:</h2>
+            <label for="archivo_excel">Ingrese el archivo Excel:</label>
+            <input style="font-family: 'MiFuente', monospace;" type="file" id="archivo_excel" accept=".xlsx"><br>
+            <button style="font-family: 'MiFuente', monospace;" onclick="extraerParticipantes()">Extraer Participantes</button>
+            <p id="resultado"></p>
+        </div>
+
+        <!-- Sección de Sorteo -->
+        <div class="contenedor">
+            <h2>Sorteo:</h2>
+            <label for="cantidad_ganadores">Cantidad de Ganadores:</label>
+            <input type="number" id="cantidad_ganadores"><br>
+
+            <label>
+                <input type="radio" id="sin_reposicion" name="sorteo_option" value="sin_reposicion"> Sin Reposición
+            </label>
+            <label>
+                <input type="radio" id="con_reposicion" name="sorteo_option" value="con_reposicion" checked> Con Reposición
+            </label><br>
+            <button style="font-family: 'MiFuente', monospace;" onclick="realizarSorteo()">Realizar Sorteo</button>
+        </div>
+
+        <!-- Bloque de Ganadores -->
+        <div class="ganadores" id="resultado_sorteo">
+            <h2>Ganadores:</h2>
+            <ul id="lista_ganadores"></ul>
+        </div>
+    </div>
+
+    <script>
+        let participantes = [];
+
+        function extraerParticipantes() {
+            const archivoExcel = document.getElementById('archivo_excel').files[0];
+
+            if (!archivoExcel) {
+                document.getElementById('resultado').textContent = 'Por favor, seleccione un archivo Excel.';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = e.target.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                participantes = [];
+                const rows = XLSX.utils.sheet_to_json(sheet);
+                console.log(rows);  // Ver los datos extraídos del archivo Excel
+
+                let totalNombres = 0;
+                let totalCupones = 0;
+
+                rows.forEach(row => {
+                    const nombre = row['Nombre'];
+                    const cupones = parseInt(row['Cupones']);
+                    if (!isNaN(cupones)) {
+                        totalNombres++;
+                        totalCupones += cupones;
+                        for (let i = 0; i < cupones; i++) {
+                            participantes.push(nombre);
+                        }
+                    }
+                });
+
+                document.getElementById('resultado').textContent = `Participantes extraídos correctamente.`;
+            };
+
+            reader.readAsBinaryString(archivoExcel);
+        }
+
+
+        function realizarSorteo() {
+            const cantidadGanadores = parseInt(document.getElementById('cantidad_ganadores').value);
+            const conReposicion = document.getElementById('con_reposicion').checked;
+
+            if (cantidadGanadores <= 0) {
+                document.getElementById('resultado_sorteo').textContent = 'Por favor, ingrese una cantidad válida de ganadores.';
+                return;
+            }
+
+            if (cantidadGanadores > participantes.length && !conReposicion) {
+                document.getElementById('resultado_sorteo').textContent = 'Error: No hay suficientes participantes para la cantidad de ganadores.';
+                return;
+            }
+
+            const ganadores = [];
+            for (let i = 0; i < cantidadGanadores; i++) {
+                const index = Math.floor(Math.random() * participantes.length);
+                ganadores.push(participantes[index]);
+                if (!conReposicion) {
+                    participantes.splice(index, 1);
+                }
+            }
+            const listaGanadores = document.getElementById('lista_ganadores');
+            listaGanadores.innerHTML = ''; // Limpiar lista anterior
+            ganadores.forEach((ganador, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${ganador}`;
+                listaGanadores.appendChild(li);
+            });
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+</body>
+</html>
