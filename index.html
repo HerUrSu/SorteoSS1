@@ -1,228 +1,1112 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteo</title>
-    <style>
-        @font-face {
-            font-family: 'MiFuente';
-            src: url('SantanderHeadline-Regular.otf') format('opentype'); /* Asegúrate de que el archivo .otf esté en la misma carpeta */
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ruleta</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 32 L32 0 A32 32 0 0 1 64 32 Z' fill='%2341c3d2'/%3E%3Cpath d='M32 32 L64 32 A32 32 0 0 1 32 64 Z' fill='%23f8d34c'/%3E%3Cpath d='M32 32 L32 64 A32 32 0 0 1 0 32 Z' fill='%23EA1F27'/%3E%3Cpath d='M32 32 L0 32 A32 32 0 0 1 32 0 Z' fill='%23b15291'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%23ffffff'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23EA1F27'/%3E%3C/svg%3E">
+  <script>
+    try {
+      const c = JSON.parse(localStorage.getItem('ruleta_config') || '{}');
+      if (c.bgRuleta) {
+        const style = document.createElement('style');
+        style.innerHTML = `body { background-image: url(${c.bgRuleta}) !important; }`;
+        document.documentElement.appendChild(style);
+      }
+    } catch(e) {}
+  </script>
+  <style>
+    @font-face {
+      font-family: 'Santander Micro Text';
+      src: url('SantanderMicroText.otf') format('opentype');
+    }
 
-        body {
-            font-family: 'MiFuente', Arial, sans-serif; /* Aplicamos la fuente personalizada */
-            margin: 0;
-            padding: 0;
-            background: url('Verano3.png') no-repeat center center fixed; /* Imagen de fondo */
-            background-size: cover; /* Escalar la imagen para cubrir todo el fondo */
-        }    
-        .encabezado {
-            background-color: rgba(226, 0, 26, 0.9); /* Fondo semi-transparente */
-            color: #FFFFFF;
-            padding: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+    @font-face {
+      font-family: 'Santander Condensed';
+      src: url('SantanderCondensed-Bold.otf') format('opentype');
+      font-weight: bold;
+    }
 
-        .encabezado img {
-            position: absolute;
-            left: 20px;
-            max-height: 100px;
-        }
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
 
-        .contenedor-principal {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            position: relative;
-            top: 20px; /* Ajuste para que esté debajo del encabezado */
-            right: 150px;
-            padding-bottom: 50px; /* Espacio para el bloque de ganadores */
-        }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        .contenedor {
-            width: 600px;
-            padding: 20px;
-            margin-bottom: 10px;
-            border: 2px solid #E2001A;
-            background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco semitransparente */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 10px; /* Bordes redondeados */
-        }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
 
-        .contenedorTitulo {
-            width: 600px;
-            text-align: center; /* Centra el texto dentro del contenedor */
-        }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        .contenedorTitulo h1 {
-            font-size: 70px; /* Tamaño del texto */
-            margin: 0; /* Elimina márgenes por defecto */
-            color: #FFFFFF;
-        }
+    :root {
+      --size: clamp(320px, 70vw, 580px);
+      --bg: #0b1022;
+      --panel: rgba(255, 255, 255, 0.04);
+      --stroke: rgba(255, 255, 255, 0.12);
+      --text: #e9eefb;
+      --accent: #f8d34c;
+      --pointer: #f8d34c;
+      --peg: #f8fafc;
+    }
 
-        h2 {
-            margin: 0 0 10px 0;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        button {
-            background-color: #E2001A;
-            color: #FFFFFF;
-            border: none;
-            padding: 10px;
-            margin-top: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background-color: #0b1022;
+      background-image: url("Verano2.png");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: "Santander Micro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+      padding: 18px;
+    }
 
-        button:hover {
-            background-color: #C90017;
-        }
+    .wrap {
+      width: min(1100px, 96vw);
+      display: grid;
+      gap: 12px;
+    }
 
-        .ganadores {
-            width: 600px;
-            padding: 20px;
-            margin-bottom: 10px;
-            border: 2px solid #E2001A;
-            background-color: #E2001A; /* Fondo rojo */
-            color: #FFFFFF;
-            border-radius: 10px;
-            text-align: center;
-        }
+    .navbar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      background: rgba(10, 14, 30, 0.6);
+      padding: 8px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
 
-        .ganadores ul {
-            list-style-type: none;
-            padding: 0;
-        }
+    .nav-item {
+      color: var(--text);
+      text-decoration: none;
+      font-family: "Santander Micro Text", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 10px 24px;
+      border-radius: 99px;
+      transition: all 0.2s ease;
+      opacity: 0.7;
+      letter-spacing: 0.5px;
+    }
 
-        .ganadores li {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
+    .nav-item:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.08);
+    }
 
-    </style>
+    .nav-item.active {
+      opacity: 1;
+      background: #EA1F27;
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(226, 0, 26, 0.4);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      animation: fadeInDown 1s ease-out 0.1s both;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Santander Micro Text", sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      font-size: 18px;
+    }
+
+    .brand .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(140deg, #f97316, #22d3ee);
+      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.06);
+    }
+
+    .topActions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: "Santander Micro Text", sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #e90303;
+      color: white;
+      transition: transform .12s ease, opacity .2s ease, box-shadow .12s ease;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .ghost {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid var(--stroke);
+      box-shadow: none;
+    }
+
+    .card {
+      background: rgba(10, 14, 30, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 30px 100px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      align-items: center;
+      animation: fadeInDown 1s ease-out 0.3s both;
+    }
+
+    .layout {
+      gap: 16px;
+      grid-template-columns: 1fr;
+      align-items: center;
+    }
+
+    @media (min-width: 920px) {
+      .layout {
+        grid-template-columns: var(--size) 1fr;
+      }
+    }
+
+    .wheelArea {
+      display: grid;
+      place-items: center;
+      gap: 40px;
+    }
+
+    .wheelBox {
+      width: var(--size);
+      height: var(--size);
+      position: relative;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02), transparent 55%);
+    }
+
+    .ring {
+      position: absolute;
+      inset: -12px;
+      border: 10px solid rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hub {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: grid;
+      place-items: center;
+      font-family: "Santander Micro Text", sans-serif;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+      pointer-events: auto;
+    }
+
+    .hub button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      font-family: "Santander Condensed", sans-serif;
+      font-size: 26px;
+      padding: 0;
+      background: #EA1F27;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: transform .15s ease, box-shadow .15s ease;
+      justify-content: center;
+    }
+
+    .hub button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .hub button:active {
+      transform: scale(0.95);
+    }
+
+    .pointerWrap {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%) rotate(0deg);
+      width: 90px;
+      height: 90px;
+      z-index: 6;
+      pointer-events: none;
+      transform-origin: 50% 22px;
+    }
+
+    .pointerCap {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .pointer {
+      position: absolute;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 36px solid var(--pointer);
+      filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.55));
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .result {
+      font-family: "Santander Micro Text", sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255, 255, 255, 0.05);
+      text-align: center;
+      width: min(520px, 100%);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .help {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--stroke);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    /* Drawer */
+    .drawerOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 20;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: min(420px, 92vw);
+      background: rgba(12, 18, 33, 0.96);
+      border-left: 1px solid var(--stroke);
+      transform: translateX(100%);
+      transition: transform .24s ease;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+      box-shadow: -18px 0 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .drawerHeader,
+    .drawerFooter {
+      padding: 14px;
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .drawerFooter {
+      border-top: 1px solid var(--stroke);
+      border-bottom: 0;
+      justify-content: flex-end;
+    }
+
+    .drawerHeader h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+
+    .drawerBody {
+      padding: 14px;
+      display: grid;
+      gap: 14px;
+      overflow: auto;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-size: 12px;
+      opacity: .9;
+      letter-spacing: 0.2px;
+    }
+
+    textarea,
+    input[type="number"],
+    input[type="range"] {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 10px 10px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .toggle input {
+      transform: scale(1.25);
+    }
+
+    .tiny {
+      font-size: 12px;
+      opacity: .78;
+    }
+
+    .open .drawerOverlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .open .drawer {
+      transform: translateX(0);
+    }
+
+    .particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
 </head>
+
 <body>
-    <!-- Encabezado -->
-    <div class="encabezado">
-        <img src="SantanderSeguros_Blanco.png" alt="Logo del Sorteo">
+  <nav class="navbar">
+    <a href="index.html" class="nav-item active">Ruleta</a>
+    <a href="sorteo.html" class="nav-item">Sorteo</a>
+  </nav>
+
+  <canvas id="particleCanvas" class="particle-canvas"></canvas>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+      </div>
+      <div class="topActions">
+        <button id="shufflePaletteBtn" class="ghost">Mezclar colores</button>
+        <button id="settingsBtn">⚙️ Opciones</button>
+      </div>
     </div>
 
-
-    <!-- Contenedor Principal -->
-    <div class="contenedor-principal">
-        <div class="contenedorTitulo">
-            <h1>Sorteo</h1>
-        </div>
-        <!-- Sección de Extracción -->
-        <div class="contenedor">
-            <h2>Extracción de participantes:</h2>
-            <label for="archivo_excel">Ingrese el archivo Excel:</label>
-            <input style="font-family: 'MiFuente', monospace;" type="file" id="archivo_excel" accept=".xlsx"><br>
-            <button style="font-family: 'MiFuente', monospace;" onclick="extraerParticipantes()">Extraer Participantes</button>
-            <p id="resultado"></p>
-        </div>
-
-        <!-- Sección de Sorteo -->
-        <div class="contenedor">
-            <h2>Sorteo:</h2>
-            <label for="cantidad_ganadores">Cantidad de Ganadores:</label>
-            <input type="number" id="cantidad_ganadores"><br>
-
-            <label>
-                <input type="radio" id="sin_reposicion" name="sorteo_option" value="sin_reposicion"> Sin Reposición
-            </label>
-            <label>
-                <input type="radio" id="con_reposicion" name="sorteo_option" value="con_reposicion" checked> Con Reposición
-            </label><br>
-            <button style="font-family: 'MiFuente', monospace;" onclick="realizarSorteo()">Realizar Sorteo</button>
+    <div class="card layout">
+      <div class="wheelArea">
+        <div class="wheelBox">
+          <div id="pointerWrap" class="pointerWrap">
+            <div class="pointerCap"></div>
+            <div class="pointer"></div>
+          </div>
+          <canvas id="wheel" width="900" height="900"></canvas>
+          <div class="ring"></div>
+          <div class="hub">
+            <button id="spinBtn">Girar</button>
+          </div>
         </div>
 
-        <!-- Bloque de Ganadores -->
-        <div class="ganadores" id="resultado_sorteo">
-            <h2>Ganadores:</h2>
-            <ul id="lista_ganadores"></ul>
-        </div>
+        <div id="result" class="result">Resultado: —</div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        let participantes = [];
+  <!-- Drawer -->
+  <div id="drawerRoot">
+    <div id="overlay" class="drawerOverlay"></div>
+    <aside class="drawer" role="dialog" aria-modal="true">
+      <div class="drawerHeader">
+        <h3>Opciones para la Ruleta</h3>
+        <button id="closeDrawerBtn" class="ghost">Cerrar</button>
+      </div>
 
-        function extraerParticipantes() {
-            const archivoExcel = document.getElementById('archivo_excel').files[0];
+      <div class="drawerBody">
+        <div class="field">
+          <label>Una por línea</label>
+          <textarea id="itemsBox"></textarea>
+        </div>
 
-            if (!archivoExcel) {
-                document.getElementById('resultado').textContent = 'Por favor, seleccione un archivo Excel.';
-                return;
-            }
+        <div class="row">
+          <button id="applyBtn">Aplicar</button>
+          <button id="closeDrawerBtn2" class="ghost">Cerrar</button>
+        </div>
+      </div>
+    </aside>
+  </div>
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = e.target.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  <script>
+    // =======================
+    // Estado y elementos
+    // =======================
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const particleCanvas = document.getElementById('particleCanvas');
+    const particleCtx = particleCanvas.getContext('2d');
 
-                participantes = [];
-                const rows = XLSX.utils.sheet_to_json(sheet);
-                console.log(rows);  // Ver los datos extraídos del archivo Excel
+    // Configurar canvas de partículas
+    function resizeParticleCanvas() {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+    }
+    resizeParticleCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+    const spinBtn = document.getElementById('spinBtn');
+    const resultEl = document.getElementById('result');
 
-                let totalNombres = 0;
-                let totalCupones = 0;
+    const settingsBtn = document.getElementById('settingsBtn');
+    const overlay = document.getElementById('overlay');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const closeDrawerBtn2 = document.getElementById('closeDrawerBtn2');
+    const applyBtn = document.getElementById('applyBtn');
+    const shufflePaletteBtn = document.getElementById('shufflePaletteBtn');
 
-                rows.forEach(row => {
-                    const nombre = row['Nombre'];
-                    const cupones = parseInt(row['Cupones']);
-                    if (!isNaN(cupones)) {
-                        totalNombres++;
-                        totalCupones += cupones;
-                        for (let i = 0; i < cupones; i++) {
-                            participantes.push(nombre);
-                        }
-                    }
-                });
+    const itemsBox = document.getElementById('itemsBox');
 
-                document.getElementById('resultado').textContent = `Participantes extraídos correctamente.`;
-            };
+    const pointerWrap = document.getElementById('pointerWrap');
 
-            reader.readAsBinaryString(archivoExcel);
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    const radius = Math.min(W, H) * 0.45;
+    const labelRadius = radius * 0.8;
+
+    const defaultItems = ["Pregunta", "10 Sentadillas", "Pregunta", "Baile", "Pregunta", "Haz equilibrio", "Pregunta", "Baile"];
+    let palette = ["#FFAE42", "#3BB2BE", "#BA4F90", "#ED4D6D", "#FFAE42", "#4DC4CA", "#BA4F90", "#ED4D6D", "#FFAE42", "#4DC4CA"];
+
+    const state = {
+      items: [],
+      angle: 0,            // radianes actuales
+      spinning: false,
+      lastWinIndex: null,
+      tickEnabled: true,
+      dotsEnabled: true,
+      tickVolume: 0.35,
+      spinDuration: 5200,
+      baseTurns: 7,
+      wobble: 0.55
+    };
+
+    const pointerState = { angle: 0, vel: 0 };
+    const particles = [];
+
+    // =======================
+    // Sistema de partículas
+    // =======================
+    class Particle {
+      constructor() {
+        // Posición completamente aleatoria
+        this.x = Math.random() * window.innerWidth;
+        this.y = Math.random() < 0.8 ? -20 : Math.random() * window.innerHeight * 0.3;
+
+        // Velocidades completamente aleatorias
+        this.vx = (Math.random() - 0.5) * 12; // más variación horizontal
+        this.vy = Math.random() * 8 - 2; // puede ir hacia arriba o abajo
+
+        // Características aleatorias
+        this.size = Math.random() * 8 + 1;
+        this.color = palette[Math.floor(Math.random() * palette.length)];
+        this.life = 1;
+        // Desvanecimiento más lento para durar más abajo
+        this.decay = Math.random() * 0.006 + 0.001;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.4;
+
+        // Forma aleatoria
+        this.shape = Math.random();
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Gravedad aleatoria
+        this.vy += Math.random() * 0.2;
+
+        // Fricción variable
+        this.vx *= (0.95 + Math.random() * 0.05);
+        this.vy *= (0.95 + Math.random() * 0.05);
+
+        this.life -= this.decay;
+        this.rotation += this.rotationSpeed;
+
+        // Cambios aleatorios ocasionales
+        if (Math.random() < 0.02) {
+          this.vx += (Math.random() - 0.5) * 4;
+          this.vy += (Math.random() - 0.5) * 4;
         }
+      }
+      draw() {
+        particleCtx.save();
+        particleCtx.globalAlpha = this.life;
+        particleCtx.fillStyle = this.color;
+        particleCtx.translate(this.x, this.y);
+        particleCtx.rotate(this.rotation);
 
-
-        function realizarSorteo() {
-            const cantidadGanadores = parseInt(document.getElementById('cantidad_ganadores').value);
-            const conReposicion = document.getElementById('con_reposicion').checked;
-
-            if (cantidadGanadores <= 0) {
-                document.getElementById('resultado_sorteo').textContent = 'Por favor, ingrese una cantidad válida de ganadores.';
-                return;
-            }
-
-            if (cantidadGanadores > participantes.length && !conReposicion) {
-                document.getElementById('resultado_sorteo').textContent = 'Error: No hay suficientes participantes para la cantidad de ganadores.';
-                return;
-            }
-
-            const ganadores = [];
-            for (let i = 0; i < cantidadGanadores; i++) {
-                const index = Math.floor(Math.random() * participantes.length);
-                ganadores.push(participantes[index]);
-                if (!conReposicion) {
-                    participantes.splice(index, 1);
-                }
-            }
-            const listaGanadores = document.getElementById('lista_ganadores');
-            listaGanadores.innerHTML = ''; // Limpiar lista anterior
-            ganadores.forEach((ganador, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${ganador}`;
-                listaGanadores.appendChild(li);
-            });
+        // Múltiples formas completamente aleatorias
+        if (this.shape < 0.25) {
+          // Rectángulo
+          particleCtx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size * (0.5 + Math.random()));
+        } else if (this.shape < 0.5) {
+          // Círculo
+          particleCtx.beginPath();
+          particleCtx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+          particleCtx.fill();
+        } else if (this.shape < 0.75) {
+          // Triángulo
+          particleCtx.beginPath();
+          particleCtx.moveTo(0, -this.size / 2);
+          particleCtx.lineTo(-this.size / 2, this.size / 2);
+          particleCtx.lineTo(this.size / 2, this.size / 2);
+          particleCtx.closePath();
+          particleCtx.fill();
+        } else {
+          // Línea
+          particleCtx.strokeStyle = this.color;
+          particleCtx.lineWidth = this.size / 4;
+          particleCtx.beginPath();
+          particleCtx.moveTo(-this.size, 0);
+          particleCtx.lineTo(this.size, 0);
+          particleCtx.stroke();
         }
-    </script>
+        particleCtx.restore();
+      }
+    }
+    function createConfetti() {
+      // Muchas más partículas
+      const count = Math.floor(Math.random() * 80) + 120;
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+      }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+      // Más oleadas aleatorias
+      const waves = Math.floor(Math.random() * 4) + 2;
+      for (let w = 0; w < waves; w++) {
+        setTimeout(() => {
+          const waveCount = Math.floor(Math.random() * 40) + 20;
+          for (let i = 0; i < waveCount; i++) {
+            particles.push(new Particle());
+          }
+        }, Math.random() * 1000 + 200);
+      }
+    }
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update();
+        // Eliminar solo si se desvanece completamente o sale muy abajo
+        if (p.life <= 0 || p.y > window.innerHeight + 200) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+    function drawParticles() {
+      particles.forEach(p => p.draw());
+    }
+
+    // =======================
+    // Utilidades
+    // =======================
+    function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    function parseItems() {
+      const raw = itemsBox.value.split('\n').map(s => s.trim()).filter(Boolean);
+      state.items = raw.length >= 2 ? raw : [...defaultItems];
+    }
+    function normalizeAngle(a) {
+      const tau = Math.PI * 2;
+      a = a % tau;
+      if (a < 0) a += tau;
+      return a;
+    }
+
+    // =======================
+    // Audio tic
+    // =======================
+    let audioCtx = null;
+    function ensureAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") audioCtx.resume().catch(() => { });
+    }
+    function playTick(strength = 1) {
+      if (!state.tickEnabled) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+
+      // Sonido más suave tipo "click" de madera
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      // Configurar filtro para un sonido más suave
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2000, t);
+      filter.Q.setValueAtTime(5, t);
+
+      // Frecuencia principal más baja y suave
+      const baseFreq = 600 + (strength * 200);
+      osc.frequency.setValueAtTime(baseFreq, t);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.8, t + 0.02);
+
+      // Envolvente suave y corta
+      const vol = state.tickVolume * clamp(strength, 0.3, 1.3) * 0.6;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(vol, t + 0.002);
+      gain.gain.exponentialRampToValueAtTime(vol * 0.3, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+
+      osc.type = "sine";
+
+      // Conectar con filtro
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.03);
+    }
+
+    function playWinSound() {
+      ensureAudio();
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+
+      // Crear un sonido de celebración agradable
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const osc3 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      // Melodía simple de 3 notas ascendentes
+      osc1.frequency.setValueAtTime(523.25, t); // C5
+      osc1.frequency.setValueAtTime(659.25, t + 0.1); // E5
+      osc1.frequency.setValueAtTime(783.99, t + 0.2); // G5
+
+      osc2.frequency.setValueAtTime(659.25, t); // E5
+      osc2.frequency.setValueAtTime(783.99, t + 0.1); // G5
+      osc2.frequency.setValueAtTime(987.77, t + 0.2); // B5
+
+      osc3.frequency.setValueAtTime(392.00, t); // G4
+      osc3.frequency.setValueAtTime(523.25, t + 0.1); // C5
+      osc3.frequency.setValueAtTime(659.25, t + 0.2); // E5
+
+      // Envolvente suave y prolongada
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.2, t + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+
+      // Tipos de onda para un sonido celestial
+      osc1.type = "sine";
+      osc2.type = "triangle";
+      osc3.type = "sine";
+
+      // Conectar todo
+      osc1.connect(gain);
+      osc2.connect(gain);
+      osc3.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      // Reproducir
+      osc1.start(t);
+      osc2.start(t);
+      osc3.start(t);
+      osc1.stop(t + 0.8);
+      osc2.stop(t + 0.8);
+      osc3.stop(t + 0.8);
+    }
+
+    // =======================
+    // Dibujo ruleta
+    // =======================
+    function drawWheel() {
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 10, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.03)";
+      ctx.fill();
+
+      const n = state.items.length;
+      const slice = (Math.PI * 2) / n;
+
+      for (let i = 0; i < n; i++) {
+        const start = state.angle + i * slice;
+        const end = start + slice;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, start, end);
+        ctx.closePath();
+        ctx.fillStyle = palette[i % palette.length];
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(255,255,255,0.16)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const mid = (start + end) / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(mid);
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255,255,255,0.94)";
+        ctx.shadowColor = "rgba(0,0,0,0.45)";
+        ctx.shadowBlur = 8;
+        ctx.font = "bold 30px 'Santander Micro Text', 'Segoe UI', system-ui";
+        const label = state.items[i].length > 18 ? state.items[i].slice(0, 18) + "…" : state.items[i];
+        ctx.fillText(label, labelRadius, 0);
+        ctx.restore();
+      }
+
+      if (state.dotsEnabled) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        const dotR = 7;
+        const ringR = radius * 0.97;
+        for (let i = 0; i < n; i++) {
+          const a = state.angle + i * slice;
+          const x = Math.cos(a) * ringR;
+          const y = Math.sin(a) * ringR;
+          ctx.beginPath();
+          ctx.arc(x, y, dotR, 0, Math.PI * 2);
+          ctx.fillStyle = "white";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(0,0,0,0.28)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0,0,0,0.38)";
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      if (state.lastWinIndex !== null) {
+        const mid = state.angle + (state.lastWinIndex + 0.5) * slice;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(mid);
+        ctx.beginPath();
+        ctx.arc(radius * 0.84, 0, 13, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.94)";
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function indexAtPointer(angle) {
+      const n = state.items.length;
+      const slice = (Math.PI * 2) / n;
+      const pointerAngle = -Math.PI / 2; // arriba
+      let a = (pointerAngle - angle) % (Math.PI * 2);
+      if (a < 0) a += Math.PI * 2;
+      return Math.floor(a / slice);
+    }
+
+    // =======================
+    // Puntero wobble + tic
+    // =======================
+    let lastTickIndex = null;
+    function stepPointer(deltaAngle, speed01) {
+      // Sentido horario => deltaAngle negativo; usamos signo para inclinacion
+      const dir = Math.sign(deltaAngle) || -1;
+      pointerState.vel += (-pointerState.angle) * (0.22 + state.wobble * 0.4);
+      pointerState.vel *= 0.86;
+      pointerState.angle += pointerState.vel;
+      const follow = dir * (4 * speed01 * state.wobble);
+      const totalDeg = clamp(pointerState.angle + follow, -32, 32);
+      pointerWrap.style.transform = `translateX(-50%) rotate(${totalDeg}deg)`;
+    }
+    function hitPeg(dir, speed01) {
+      const impulse = -dir * (6 + speed01 * 24) * (0.35 + state.wobble * 0.65);
+      pointerState.vel += impulse;
+      playTick(0.8 + speed01 * 0.4);
+    }
+    function maybeTick(deltaAngle, speed01) {
+      const idx = indexAtPointer(state.angle);
+      if (lastTickIndex === null) lastTickIndex = idx;
+      if (idx !== lastTickIndex) {
+        hitPeg(Math.sign(deltaAngle) || -1, speed01);
+        lastTickIndex = idx;
+      }
+    }
+    function resetPointer() {
+      pointerState.angle = 0;
+      pointerState.vel = 0;
+      pointerWrap.style.transition = "transform 180ms ease";
+      pointerWrap.style.transform = "translateX(-50%) rotate(0deg)";
+      setTimeout(() => pointerWrap.style.transition = "", 220);
+    }
+
+    // =======================
+    // Giro (siempre horario)
+    // =======================
+    function spin() {
+      if (state.spinning) return;
+      parseItems();
+      drawWheel();
+
+      // mantener el ángulo en rango para asegurar giro horario
+      state.angle = normalizeAngle(state.angle);
+
+      const n = state.items.length;
+      const slice = (Math.PI * 2) / n;
+
+      const winIndex = Math.floor(Math.random() * n);
+      const pointerAngle = -Math.PI / 2;
+      const targetMid = (winIndex + 0.5) * slice;
+      const baseTurns = clamp(state.baseTurns + Math.floor(Math.random() * 3), 2, 30);
+
+      // sentido horario => delta negativo
+      const desiredFinal = pointerAngle - targetMid - baseTurns * Math.PI * 2;
+      const startAngle = state.angle;
+      const delta = desiredFinal - startAngle; // negativo
+
+      const duration = clamp(state.spinDuration + Math.floor(Math.random() * 450), 1200, 15000);
+      const t0 = performance.now();
+
+      state.spinning = true;
+      spinBtn.disabled = true;
+      lastTickIndex = null;
+
+      function easeOutQuint(t) { return 1 - Math.pow(1 - t, 5); }
+
+      function frame(now) {
+        const t = Math.min(1, (now - t0) / duration);
+        const e = easeOutQuint(t);
+
+        const prevAngle = state.angle;
+        state.angle = startAngle + delta * e; // sigue siendo horario
+        const dA = state.angle - prevAngle;
+        const speed01 = clamp(Math.abs(dA) / 0.2, 0, 1);
+
+        stepPointer(dA, speed01);
+        maybeTick(dA, speed01);
+        drawWheel();
+
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          state.spinning = false;
+          spinBtn.disabled = false;
+          resetPointer();
+          state.lastWinIndex = indexAtPointer(state.angle);
+          resultEl.textContent = `Resultado: ${state.items[state.lastWinIndex]}`;
+          createConfetti();
+          drawWheel();
+          playWinSound(); // Sonido de celebración
+          animateCelebration();
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function animateCelebration() {
+      function frame() {
+        drawWheel();
+        // Limpiar canvas de partículas
+        particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        updateParticles();
+        drawParticles();
+        if (particles.length > 0) {
+          requestAnimationFrame(frame);
+        }
+      }
+      frame();
+    }
+    // =======================
+    function openDrawer() { document.body.classList.add('open'); }
+    function closeDrawer() { document.body.classList.remove('open'); }
+    settingsBtn.addEventListener('click', openDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    closeDrawerBtn2.addEventListener('click', closeDrawer);
+
+    function syncSettingsUI() {
+      itemsBox.value = state.items.join("\n");
+    }
+
+    function applySettings() {
+      parseItems();
+      state.lastWinIndex = null;
+      drawWheel();
+      resetPointer();
+    }
+
+    applyBtn.addEventListener('click', () => {
+      applySettings();
+      closeDrawer();
+    });
+
+    shufflePaletteBtn.addEventListener('click', () => {
+      palette = shuffle(palette);
+      drawWheel();
+    });
+
+    // =======================
+    // Botón girar
+    // =======================
+    spinBtn.addEventListener('click', () => {
+      ensureAudio();
+      spin();
+    });
+
+    // =======================
+    // Init
+    // =======================
+    (function init() {
+      state.items = [...defaultItems];
+      syncSettingsUI();
+      drawWheel();
+      resultEl.textContent = "Resultado: —";
+    })();
+  </script>
+  <script src="admin.js"></script>
 </body>
+
 </html>
