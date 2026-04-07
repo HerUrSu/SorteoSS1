@@ -1,0 +1,19 @@
+GUIA DE APERTURA COMERCIAL
+Portal Comercial IA - Material de ejemplo
+
+Objetivo
+- Abrir una conversacion comercial sin perder naturalidad.
+- Detectar una necesidad real antes de proponer cobertura.
+
+Secuencia sugerida
+1. Confirmar el contexto del cliente.
+2. Hacer una pregunta breve de descubrimiento.
+3. Conectar la necesidad con una proteccion concreta.
+4. Cerrar con siguiente paso visible.
+
+Preguntas base
+- Que es lo que mas te preocupa hoy respecto a tu cobertura?
+- Prefieres resolverlo ahora o dejar una alternativa clara para despues?
+
+Cierre sugerido
+- Si te parece, te dejo la opcion lista y revisamos en dos minutos.

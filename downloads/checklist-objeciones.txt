@@ -1,0 +1,20 @@
+CHECKLIST DE OBJECIONES
+Portal Comercial IA - Material de ejemplo
+
+Antes de responder
+- Escuchar la objecion completa.
+- Confirmar si el problema es precio, tiempo o prioridad.
+- Responder con un beneficio principal, no con toda la cobertura.
+
+Objeciones frecuentes
+- "No tengo tiempo"
+  Respuesta sugerida: Te resumo solo lo esencial y si no te sirve, lo dejamos hasta aqui.
+
+- "Lo voy a pensar"
+  Respuesta sugerida: Perfecto. Te dejo una alternativa clara para que compares con calma.
+
+- "No lo necesito ahora"
+  Respuesta sugerida: Lo entiendo. Justamente la idea es dejar cubierta la necesidad antes de que te genere un problema mayor.
+
+Cierre
+- Dejar callback, resumen o derivacion concreta.
